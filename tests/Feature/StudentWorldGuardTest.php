@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\TicketPriority;
+use App\Enums\TicketStatus;
 use App\Enums\TicketType;
 use App\Models\Ticket;
 use App\Models\User;
@@ -34,7 +35,7 @@ it('blocks a leidinggevende from approving without a chosen student world', func
 });
 
 it('does not block a technicus acting in their own world', function () {
-    $ticket = Ticket::factory()->create(['status' => \App\Enums\TicketStatus::Open]);
+    $ticket = Ticket::factory()->create(['status' => TicketStatus::Open]);
 
     actingAs(User::factory()->technicus()->create());
     Livewire::test('pages::tickets.show', ['ticket' => $ticket])

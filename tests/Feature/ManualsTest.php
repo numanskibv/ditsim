@@ -4,7 +4,6 @@ use App\Models\User;
 use App\Support\Manuals;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Laravel\get;
 
 it('lists the role manuals with friendly labels', function () {
     $slugs = app(Manuals::class)->all()->pluck('slug');

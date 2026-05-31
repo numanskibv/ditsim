@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Enums\Role;
+use App\Models\Scopes\StudentScope;
 use App\Models\User;
 use Closure;
 use Illuminate\Support\Facades\Auth;
@@ -13,7 +14,7 @@ use Throwable;
  *
  * Every piece of simulation state belongs to exactly one student (a technicus).
  * This resolver answers a single question — "whose world are we looking at?" —
- * and the {@see \App\Models\Scopes\StudentScope} global scope uses the answer to
+ * and the {@see StudentScope} global scope uses the answer to
  * isolate one student's data from another's.
  *
  * Resolution order:
