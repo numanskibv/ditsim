@@ -1,0 +1,133 @@
+# Datacenter-sim — one command to run the whole stack anywhere:
+#
+#     docker compose up --build
+#
+# Then open http://localhost:8000 (Reverb websockets on :8080).
+#
+# Clean start: this stack boots EMPTY (SEED_DEMO=false). Register the first
+# account via the app — it automatically becomes the docent (beheerder). After
+# that the docent creates the students via "Studenten beheren".
+# Want the MediCloud demo data + demo accounts instead? Set SEED_DEMO to "true".
+#
+# This stack runs on PostgreSQL so it stays reliable with a whole class working
+# at once (no SQLite file locking) and keeps its data in a named volume. For
+# lightweight local development you can still use SQLite via `php artisan serve`.
+
+x-app-env: &app-env
+  APP_NAME: "Datacenter Sim"
+  APP_ENV: local
+  APP_DEBUG: "true"
+  APP_KEY: "base64:uH0gHsj9W5XXWihha+/Yt+9PRI4JT4P/wK5Cbr13Vlk="
+  APP_URL: "http://localhost:8000"
+
+  DB_CONNECTION: pgsql
+  DB_HOST: db
+  DB_PORT: "5432"
+  DB_DATABASE: datacenter
+  DB_USERNAME: datacenter
+  DB_PASSWORD: datacenter
+
+  # Schoon starten: geen demodata/-accounts. De eerste registratie wordt docent.
+  # Zet op "true" voor de MediCloud-demo met kant-en-klare accounts.
+  SEED_DEMO: "false"
+
+  # Standaardwachtwoord voor (demo)accounts als SEED_DEMO=true. Zet in een echte
+  # (publieke) omgeving een sterk wachtwoord.
+  DEFAULT_ACCOUNT_PASSWORD: password
+
+  SESSION_DRIVER: database
+  CACHE_STORE: database
+  QUEUE_CONNECTION: database
+
+  # Broadcasting → Reverb. The app/queue reach the reverb container by name;
+  # the browser reaches it on the host-mapped port (baked into the JS at build).
+  BROADCAST_CONNECTION: reverb
+  REVERB_APP_ID: datacenter
+  REVERB_APP_KEY: datacenterkey
+  REVERB_APP_SECRET: datacentersecret
+  REVERB_HOST: reverb
+  REVERB_PORT: "8080"
+  REVERB_SCHEME: http
+  REVERB_SERVER_HOST: "0.0.0.0"
+  REVERB_SERVER_PORT: "8080"
+
+services:
+  # PostgreSQL database (persistent, concurrency-safe).
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: datacenter
+      POSTGRES_USER: datacenter
+      POSTGRES_PASSWORD: datacenter
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U datacenter -d datacenter"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  # Web server (also runs the one-time migrate + seed via app:install).
+  app:
+    build:
+      context: .
+      args:
+        VITE_REVERB_APP_KEY: datacenterkey
+        VITE_REVERB_HOST: localhost
+        VITE_REVERB_PORT: "8080"
+        VITE_REVERB_SCHEME: http
+    image: datacenter-sim
+    environment:
+      <<: *app-env
+      RUN_MIGRATIONS: "1"
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit((int) (@file_get_contents('http://127.0.0.1:8000/up') === false));"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+    restart: unless-stopped
+
+  # Realtime websocket server.
+  reverb:
+    image: datacenter-sim
+    environment:
+      <<: *app-env
+    command: ["php", "artisan", "reverb:start", "--host=0.0.0.0", "--port=8080"]
+    ports:
+      - "8080:8080"
+    depends_on:
+      app:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Queue worker — processes scenario jobs AND broadcast events.
+  queue:
+    image: datacenter-sim
+    environment:
+      <<: *app-env
+    command: ["php", "artisan", "queue:work", "--tries=3", "--sleep=1", "--timeout=0"]
+    depends_on:
+      app:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Scheduler — runs simulate:tick every minute.
+  scheduler:
+    image: datacenter-sim
+    environment:
+      <<: *app-env
+    command: ["php", "artisan", "schedule:work"]
+    depends_on:
+      app:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  pgdata:
