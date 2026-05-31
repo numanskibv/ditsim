@@ -1,0 +1,40 @@
+# Lokaal draaien met Docker, ZONDER de productie-instellingen te raken.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.local.yml up --build
+#
+# Zet de app terug op http://localhost:8000 en bouwt de Vite-assets voor
+# localhost, zodat styling én websockets lokaal kloppen. De nuc gebruikt gewoon
+# `docker compose up` (zonder -f) en blijft op https://ditsim.mbouit.nl.
+#
+# Je hebt nog steeds een .env met de (mogen lokaal dummy zijn) secrets nodig,
+# want docker-compose.yml vereist APP_KEY/DB_PASSWORD/REVERB_APP_* om te parsen.
+
+services:
+  app:
+    build:
+      args:
+        VITE_REVERB_HOST: localhost
+        VITE_REVERB_PORT: "8080"
+        VITE_REVERB_SCHEME: http
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: "http://localhost:8000"
+
+  reverb:
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: "http://localhost:8000"
+
+  queue:
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: "http://localhost:8000"
+
+  scheduler:
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: "http://localhost:8000"
