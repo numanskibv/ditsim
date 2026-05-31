@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Scenario;
 use App\Models\Scopes\StudentScope;
 use App\Models\Ticket;
 use App\Models\User;
@@ -27,16 +28,21 @@ it('imports the demo on a clean database and creates the demo accounts', functio
     expect(demoTicketCount())->toBeGreaterThan(0);
     expect(Ticket::withoutGlobalScope(StudentScope::class)->where('number', 'INC-2026-0001')->value('student_id'))
         ->toBe($technicus->id);
+
+    // The library of 15 assignable scenarios is seeded too.
+    expect(Scenario::count())->toBeGreaterThanOrEqual(15);
 });
 
 it('can be re-imported without duplicate-key errors or duplicate rows', function () {
     $this->artisan('simulate:import-demo')->assertSuccessful();
     $ticketsAfterFirst = demoTicketCount();
+    $scenariosAfterFirst = Scenario::count();
 
     // Previously this threw SQLSTATE[23505] on tickets_number_unique.
     $this->artisan('simulate:import-demo')->assertSuccessful();
 
     expect(demoTicketCount())->toBe($ticketsAfterFirst);
+    expect(Scenario::count())->toBe($scenariosAfterFirst);
     expect(User::where('email', 'technicus@datacenter-sim.test')->count())->toBe(1);
     expect(Ticket::withoutGlobalScope(StudentScope::class)->where('number', 'INC-2026-0001')->count())->toBe(1);
 });

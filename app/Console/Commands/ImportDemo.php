@@ -7,6 +7,7 @@ use App\Support\StudentWorld;
 use Database\Seeders\DcimSeeder;
 use Database\Seeders\DemoAccountsSeeder;
 use Database\Seeders\DemoSeeder;
+use Database\Seeders\ScenarioLibrarySeeder;
 use Database\Seeders\TicketSeeder;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
@@ -18,8 +19,8 @@ use Illuminate\Console\Command;
  * the demo technicus' world (Tessa). The fixed demo accounts are ensured first
  * (idempotent), so the import works — and is visible — even on a clean install
  * that has no demo accounts yet. Existing demo-world data is cleared first so it
- * is safe to run repeatedly; other students' worlds and the scenario library
- * are left untouched.
+ * is safe to run repeatedly. The library of 15 assignable scenarios is seeded
+ * too (idempotent), and other students' worlds are left untouched.
  */
 #[Signature('simulate:import-demo')]
 #[Description('(Re)import the MediCloud demo data for testing.')]
@@ -40,6 +41,9 @@ class ImportDemo extends Command
         $this->call('db:seed', ['--class' => DcimSeeder::class, '--force' => true]);
         $this->call('db:seed', ['--class' => TicketSeeder::class, '--force' => true]);
         $this->call('db:seed', ['--class' => DemoSeeder::class, '--force' => true]);
+
+        // De bibliotheek van 15 toewijsbare scenario's (idempotent op naam).
+        $this->call('db:seed', ['--class' => ScenarioLibrarySeeder::class, '--force' => true]);
 
         $this->info('Demodata (opnieuw) geïmporteerd.');
 
