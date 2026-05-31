@@ -77,6 +77,64 @@ it('moves a device to another rack through the form', function () {
     expect($device->fresh()->rack_id)->toBe($to->id);
 });
 
+it('lets a technicus build a rack in their own world through the form', function () {
+    $technicus = User::factory()->technicus()->create();
+
+    actingAs($technicus);
+    Livewire::test('dcim.rack-form')
+        ->call('openCreate')
+        ->set('name', 'R09')
+        ->set('location', 'DC-Utrecht')
+        ->set('height_u', 42)
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertDispatched('rack-saved');
+
+    $rack = Rack::where('name', 'R09')->first();
+
+    expect($rack)->not->toBeNull()
+        ->and($rack->location)->toBe('DC-Utrecht')
+        ->and($rack->height_u)->toBe(42)
+        ->and($rack->student_id)->toBe($technicus->id);
+});
+
+it('forbids a klant from creating a rack', function () {
+    $klant = User::factory()->klant()->create();
+
+    actingAs($klant);
+    Livewire::test('dcim.rack-form')
+        ->call('openCreate')
+        ->assertForbidden();
+});
+
+it('lets a technicus delete a rack and cascades its devices', function () {
+    $technicus = User::factory()->technicus()->create();
+
+    actingAs($technicus);
+    $rack = Rack::factory()->create();
+    $device = Device::factory()->for($rack)->atPosition(1, 2)->create();
+
+    Livewire::test('dcim.rack-form')
+        ->call('delete', $rack->id)
+        ->assertHasNoErrors()
+        ->assertDispatched('rack-saved');
+
+    expect(Rack::find($rack->id))->toBeNull()
+        ->and(Device::find($device->id))->toBeNull();
+});
+
+it('forbids a klant from deleting a rack', function () {
+    $klant = User::factory()->klant()->create();
+    $rack = Rack::factory()->create();
+
+    actingAs($klant);
+    Livewire::test('dcim.rack-form')
+        ->call('delete', $rack->id)
+        ->assertForbidden();
+
+    expect(Rack::find($rack->id))->not->toBeNull();
+});
+
 it('forbids a klant from opening the device form', function () {
     $klant = User::factory()->klant()->create();
     $rack = Rack::factory()->create();

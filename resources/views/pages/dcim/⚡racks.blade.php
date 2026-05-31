@@ -23,10 +23,11 @@ new #[Title('DCIM — Racks')] class extends Component
     }
 
     /**
-     * Re-render after the device form saves so the grid and the
+     * Re-render after the device or rack form saves so the grid and the
      * "laatste wijziging" indicator reflect the change immediately.
      */
     #[On('device-saved')]
+    #[On('rack-saved')]
     public function refresh(): void
     {
         unset($this->racks);
@@ -41,9 +42,14 @@ new #[Title('DCIM — Racks')] class extends Component
         </div>
 
         @can('execute-tasks')
-            <flux:button variant="primary" icon="plus" wire:click="$dispatch('add-device')">
-                {{ __('Device toevoegen') }}
-            </flux:button>
+            <div class="flex gap-2">
+                <flux:button icon="plus" wire:click="$dispatch('add-rack')" data-test="add-rack-button">
+                    {{ __('Rack toevoegen') }}
+                </flux:button>
+                <flux:button variant="primary" icon="plus" wire:click="$dispatch('add-device')">
+                    {{ __('Device toevoegen') }}
+                </flux:button>
+            </div>
         @endcan
     </div>
 
@@ -57,14 +63,24 @@ new #[Title('DCIM — Racks')] class extends Component
                         <flux:text size="sm" variant="subtle">{{ $rack->location }} · {{ $rack->height_u }}U</flux:text>
                     </div>
                     @can('execute-tasks')
-                        <flux:button
-                            size="sm"
-                            variant="ghost"
-                            icon="plus"
-                            wire:click="$dispatch('add-device', { rackId: {{ $rack->id }} })"
-                        >
-                            {{ __('Device') }}
-                        </flux:button>
+                        <div class="flex gap-1">
+                            <flux:button
+                                size="sm"
+                                variant="ghost"
+                                icon="plus"
+                                wire:click="$dispatch('add-device', { rackId: {{ $rack->id }} })"
+                            >
+                                {{ __('Device') }}
+                            </flux:button>
+                            <flux:button
+                                size="sm"
+                                variant="ghost"
+                                icon="trash"
+                                wire:click="$dispatch('delete-rack', { rackId: {{ $rack->id }} })"
+                                wire:confirm="{{ __('Dit rack én alle devices erin verwijderen?') }}"
+                                data-test="delete-rack-{{ $rack->id }}"
+                            />
+                        </div>
                     @endcan
                 </div>
 
@@ -127,4 +143,5 @@ new #[Title('DCIM — Racks')] class extends Component
     </div>
 
     <livewire:dcim.device-form />
+    <livewire:dcim.rack-form />
 </section>
