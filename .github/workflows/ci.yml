@@ -1,0 +1,56 @@
+name: CI
+
+# Alleen CI: automatisch testen bij elke push en bij pull requests naar main.
+# Draait volledig op GitHub's eigen runners. GEEN deployment/CD, geen secrets,
+# geen toegang tot de nuc-server of productie.
+on:
+  push:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  tests:
+    name: Lint & Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: PHP 8.3 + extensies
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, dom, xml, ctype, bcmath, pdo, pdo_sqlite, sqlite3, gd, fileinfo, curl, openssl, tokenizer
+          coverage: none
+          tools: composer
+
+      - name: Composer install (cached)
+        uses: ramsey/composer-install@v3
+        with:
+          composer-options: "--no-interaction --prefer-dist --no-progress"
+
+      - name: .env + APP_KEY
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Node 22 (cached)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Frontend build (Vite-manifest)
+        run: |
+          npm ci
+          npm run build
+
+      - name: Lint (Pint --test)
+        run: ./vendor/bin/pint --test
+
+      # Draait ook als Pint faalt, zodat je in de Actions-tab los ziet of de
+      # codestijl (Pint) of de functionaliteit (tests) rood is.
+      - name: Tests (php artisan test)
+        if: ${{ !cancelled() }}
+        run: php artisan test
