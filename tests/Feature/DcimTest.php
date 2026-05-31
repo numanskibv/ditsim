@@ -60,6 +60,27 @@ it('lets a technicus add a device through the form', function () {
         ->and($device->last_changed_by)->toBe($technicus->id);
 });
 
+it('saves a new device with the default type and status without touching them', function () {
+    $technicus = User::factory()->technicus()->create();
+    $rack = Rack::factory()->create(['height_u' => 42]);
+
+    actingAs($technicus);
+    Livewire::test('dcim.device-form')
+        ->call('openCreate', $rack->id)
+        ->set('name', 'srv-default')
+        ->set('u_start', 1)
+        ->set('u_end', 2)
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertDispatched('device-saved');
+
+    $device = Device::where('name', 'srv-default')->first();
+
+    expect($device)->not->toBeNull()
+        ->and($device->type)->toBe(DeviceType::Server)
+        ->and($device->status)->toBe(DeviceStatus::Actief);
+});
+
 it('moves a device to another rack through the form', function () {
     $technicus = User::factory()->technicus()->create();
     $from = Rack::factory()->create();

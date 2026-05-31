@@ -84,6 +84,12 @@ new class extends Component
 
         $this->resetForm();
         $this->rack_id = $rackId ?? $this->racks->first()?->id;
+
+        // Defaults die overeenkomen met wat de selects tonen, zodat opslaan
+        // zonder de velden aan te raken niet faalt op de required-validatie.
+        $this->type = DeviceType::Server->value;
+        $this->status = DeviceStatus::Actief->value;
+
         $this->showModal = true;
     }
 
