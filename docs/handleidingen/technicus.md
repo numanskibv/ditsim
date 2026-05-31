@@ -18,8 +18,9 @@ menu-item **Opdrachten uitvoeren**.
 ## Jouw eigen omgeving en je partner
 
 - Je werkt in een **eigen, afgeschermde omgeving**. Wat jij doet, ziet een medestudent niet —
-  en jij ziet hun werk niet. Je begint mogelijk met een **lege** omgeving; de docent wijst je
-  een startscenario toe waarmee je rack klaar staat.
+  en jij ziet hun werk niet. Je begint mogelijk met een **lege** omgeving; de docent kan je
+  een startscenario toewijzen waarmee een rack klaarstaat, óf je **bouwt zelf een rack** op
+  (zie hieronder bij Racks).
 - Je bent **technicus in je eigen wereld**: je voert de opdrachten uit (DCIM, tickets,
   inspectie, toegangsregister, monitoring).
 - **Tegenrol bij je partner.** Heeft de docent jou aan een partner gekoppeld, dan zie je
@@ -47,9 +48,15 @@ menu-item **Opdrachten uitvoeren**.
   - 🟠 **Waarschuwing** — vroeg signaal (CPU ≥ 85% of temperatuur ≥ 65 °C)
   - 🔴 **Storing** — kritiek (CPU ≥ 95% of temperatuur ≥ 80 °C)
   - ⚪ **Offline**
-- **Apparaat toevoegen:** klik op _Apparaat toevoegen_, vul naam, type (server/switch/
+- **Rack toevoegen:** klik rechtsboven op _Rack toevoegen_ en vul **naam** (bv. R04),
+  **locatie** (bv. DC-Utrecht) en **hoogte in U** (bv. 42) in. Het nieuwe rack verschijnt
+  meteen in je eigen omgeving, klaar om te vullen.
+- **Apparaat toevoegen:** klik op _Device toevoegen_, vul naam, type (server/switch/
   router/storage/firewall), U-positie (start–eind) en metrics in.
-- **Apparaat wijzigen:** klik een bestaand blok aan en pas het aan.
+- **Apparaat wijzigen:** klik een bestaand blok aan en pas het aan, of verplaats het naar een
+  ander rack.
+- **Rack verwijderen:** klik op het prullenbak-icoon bij een rack. Let op: dit verwijdert het
+  rack **inclusief alle apparaten erin** (je krijgt eerst een bevestiging).
 
 > 📸 **Bewijs (opdracht 1, 5, 6):** Elke wijziging logt automatisch wie het deed en
 > wanneer (`last_changed_at` / `last_changed_by`). Maak een screenshot van het rackoverzicht.
