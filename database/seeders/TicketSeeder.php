@@ -7,6 +7,7 @@ use App\Enums\TicketPriority;
 use App\Enums\TicketStatus;
 use App\Enums\TicketType;
 use App\Models\Device;
+use App\Models\Scopes\StudentScope;
 use App\Models\Ticket;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -28,7 +29,7 @@ class TicketSeeder extends Seeder
     public function run(): void
     {
         $klant = User::where('email', 'klant@medicloud.test')->first();
-        $technicus = User::where('role', Role::Technicus->value)->first();
+        $technicus = User::where('email', 'technicus@datacenter-sim.test')->first();
         $leidinggevende = User::where('role', Role::Leidinggevende->value)->first();
 
         $this->world = $technicus?->id;
@@ -98,6 +99,12 @@ class TicketSeeder extends Seeder
         $attributes['sla_minutes'] = $priority->slaMinutes();
         $attributes['student_id'] ??= $this->world;
 
-        (new Ticket)->forceFill($attributes)->saveQuietly();
+        // Idempotent op het (unieke) ticketnummer: hergebruik een bestaand
+        // ticket i.p.v. blind inserten, zodat (her)import niet botst op
+        // tickets_number_unique — ook niet op eerdere "ownerless" demo-tickets.
+        Ticket::withoutGlobalScope(StudentScope::class)
+            ->firstOrNew(['number' => $attributes['number']])
+            ->forceFill($attributes)
+            ->saveQuietly();
     }
 }

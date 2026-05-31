@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Enums\DeviceStatus;
 use App\Enums\DeviceType;
-use App\Enums\Role;
 use App\Models\Device;
 use App\Models\Rack;
 use App\Models\User;
@@ -22,10 +21,11 @@ class DcimSeeder extends Seeder
     public function run(): void
     {
         $owner = User::where('email', 'klant@medicloud.test')->first();
-        $technicus = User::where('role', Role::Technicus->value)->first();
+        $technicus = User::where('email', 'technicus@datacenter-sim.test')->first();
 
-        // The demo world belongs to the first technicus (Tessa); newly added
-        // students start with an empty world of their own.
+        // The demo world belongs to the demo technicus (Tessa); resolving her by
+        // e-mail keeps the import deterministic and avoids ever overwriting a
+        // real student's world. Newly added students start empty.
         $world = $technicus?->id;
 
         $rack = Rack::updateOrCreate(

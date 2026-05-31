@@ -12,6 +12,7 @@ use App\Models\Device;
 use App\Models\InspectionReport;
 use App\Models\Message;
 use App\Models\Scenario;
+use App\Models\Scopes\StudentScope;
 use App\Models\Ticket;
 use App\Models\User;
 use App\Models\VisitorLog;
@@ -35,7 +36,7 @@ class DemoSeeder extends Seeder
     public function run(): void
     {
         $klant = User::where('email', 'klant@medicloud.test')->first();
-        $technicus = User::where('role', Role::Technicus->value)->first();
+        $technicus = User::where('email', 'technicus@datacenter-sim.test')->first();
         $leiding = User::where('role', Role::Leidinggevende->value)->first();
         $docent = User::where('role', Role::Docent->value)->first();
 
@@ -56,7 +57,9 @@ class DemoSeeder extends Seeder
      */
     protected function seedApprovedInstallation(?Device $device, ?User $klant, ?User $technicus, ?User $leiding): void
     {
-        $ticket = new Ticket;
+        // Idempotent op het unieke ticketnummer, zodat (her)import niet botst.
+        $ticket = Ticket::withoutGlobalScope(StudentScope::class)
+            ->firstOrNew(['number' => 'CHG-2026-0001']);
         $ticket->forceFill([
             'number' => 'CHG-2026-0001',
             'type' => TicketType::Change->value,
@@ -73,6 +76,9 @@ class DemoSeeder extends Seeder
             'created_at' => now()->subDays(2),
             'closed_at' => now()->subDays(2)->addHours(3),
         ])->saveQuietly();
+
+        // Verwijder een eventueel bestaand plan zodat herimport er niet stapelt.
+        $ticket->installationPlan()->delete();
 
         $plan = $ticket->installationPlan()->create([
             'werkzaamheden' => 'Koelunit monteren in U38-U40, aansluiten op PDU-B en koelwatercircuit.',
