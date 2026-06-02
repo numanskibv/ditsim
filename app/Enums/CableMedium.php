@@ -34,4 +34,17 @@ enum CableMedium: string
             self::Power => 'stroke-red-500',
         };
     }
+
+    /**
+     * Tailwind background/border classes for an occupied port dot.
+     */
+    public function dotClass(): string
+    {
+        return match ($this) {
+            self::Utp => 'bg-blue-500 border-blue-600',
+            self::Fiber => 'bg-amber-500 border-amber-600',
+            self::Coax => 'bg-purple-500 border-purple-600',
+            self::Power => 'bg-red-500 border-red-600',
+        };
+    }
 }

@@ -69,6 +69,24 @@ new class extends Component
     }
 
     /**
+     * Open the form pre-filled from two clicked ports (click-to-connect),
+     * so the student only has to give the cable a number and type.
+     */
+    #[On('patch-ports')]
+    public function openFromPorts(int $fromDeviceId, int $fromPort, int $toDeviceId, int $toPort): void
+    {
+        $this->authorize(Ability::ExecuteTasks->value);
+
+        $this->resetForm();
+        $this->medium = CableMedium::Utp->value;
+        $this->from_device_id = $fromDeviceId;
+        $this->from_port = $fromPort;
+        $this->to_device_id = $toDeviceId;
+        $this->to_port = $toPort;
+        $this->showModal = true;
+    }
+
+    /**
      * Open the form to edit an existing cable.
      */
     #[On('edit-cable')]

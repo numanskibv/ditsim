@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CableSchedulePdfController;
 use App\Http\Controllers\InstallationPlanPdfController;
 use App\Http\Controllers\ManualPrintController;
 use App\Http\Controllers\PortfolioExportController;
@@ -12,6 +13,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::livewire('dcim', 'pages::dcim.racks')->name('dcim.racks');
     Route::livewire('dcim/cabling', 'pages::dcim.cabling')->name('dcim.cabling');
+    Route::get('dcim/cabling/pdf', CableSchedulePdfController::class)->name('dcim.cabling.pdf');
 
     Route::livewire('tickets', 'pages::tickets.index')->name('tickets.index');
     Route::livewire('tickets/{ticket}', 'pages::tickets.show')->name('tickets.show');

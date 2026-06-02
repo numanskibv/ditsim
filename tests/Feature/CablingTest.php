@@ -142,3 +142,47 @@ it('shows the cable schedule on the cabling page', function () {
         ->assertSee('sw01')
         ->assertSee('patch01');
 });
+
+it('opens the cable form pre-filled when two ports are patched', function () {
+    $technicus = User::factory()->technicus()->create();
+
+    actingAs($technicus);
+    $rack = Rack::factory()->create();
+    $a = Device::factory()->for($rack)->create(['port_count' => 24]);
+    $b = Device::factory()->for($rack)->create(['port_count' => 24]);
+
+    Livewire::test('dcim.cable-form')
+        ->call('openFromPorts', $a->id, 5, $b->id, 2)
+        ->assertSet('showModal', true)
+        ->assertSet('from_device_id', $a->id)
+        ->assertSet('from_port', 5)
+        ->assertSet('to_device_id', $b->id)
+        ->assertSet('to_port', 2);
+});
+
+it('forbids a klant from patching ports', function () {
+    $klant = User::factory()->klant()->create();
+    $rack = Rack::factory()->create();
+    $a = Device::factory()->for($rack)->create();
+    $b = Device::factory()->for($rack)->create();
+
+    actingAs($klant);
+    Livewire::test('dcim.cable-form')
+        ->call('openFromPorts', $a->id, 1, $b->id, 2)
+        ->assertForbidden();
+});
+
+it('downloads the cable schedule as a PDF', function () {
+    $technicus = User::factory()->technicus()->create();
+
+    actingAs($technicus);
+    $rack = Rack::factory()->create();
+    $a = Device::factory()->for($rack)->create(['name' => 'sw01', 'port_count' => 24]);
+    $b = Device::factory()->for($rack)->create(['name' => 'patch01', 'port_count' => 24]);
+    Cable::factory()->between($a, 3, $b, 1)->create(['label' => 'K-001']);
+
+    $response = actingAs($technicus)->get(route('dcim.cabling.pdf'));
+
+    $response->assertOk();
+    expect($response->headers->get('content-type'))->toContain('application/pdf');
+});
