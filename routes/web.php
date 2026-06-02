@@ -11,6 +11,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('dashboard', 'dashboard')->name('dashboard');
 
     Route::livewire('dcim', 'pages::dcim.racks')->name('dcim.racks');
+    Route::livewire('dcim/cabling', 'pages::dcim.cabling')->name('dcim.cabling');
 
     Route::livewire('tickets', 'pages::tickets.index')->name('tickets.index');
     Route::livewire('tickets/{ticket}', 'pages::tickets.show')->name('tickets.show');

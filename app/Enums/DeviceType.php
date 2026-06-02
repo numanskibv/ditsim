@@ -9,6 +9,7 @@ enum DeviceType: string
     case Router = 'router';
     case Storage = 'storage';
     case Firewall = 'firewall';
+    case Patchpaneel = 'patchpaneel';
 
     /**
      * The human readable label for the device type.
@@ -21,6 +22,7 @@ enum DeviceType: string
             self::Router => 'Router',
             self::Storage => 'Storage',
             self::Firewall => 'Firewall',
+            self::Patchpaneel => 'Patchpaneel',
         };
     }
 }

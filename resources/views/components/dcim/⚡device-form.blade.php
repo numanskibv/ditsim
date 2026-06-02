@@ -34,6 +34,8 @@ new class extends Component
 
     public ?int $u_end = null;
 
+    public ?int $port_count = 4;
+
     /**
      * The racks available to mount a device in (also used for moving).
      *
@@ -111,6 +113,7 @@ new class extends Component
         $this->status = $device->status->value;
         $this->u_start = $device->u_start;
         $this->u_end = $device->u_end;
+        $this->port_count = $device->port_count;
         $this->showModal = true;
     }
 
@@ -153,6 +156,7 @@ new class extends Component
             'status' => ['required', Rule::enum(DeviceStatus::class)],
             'u_start' => ['required', 'integer', 'min:1'],
             'u_end' => ['required', 'integer', 'gte:u_start'],
+            'port_count' => ['required', 'integer', 'min:1', 'max:96'],
         ];
     }
 
@@ -187,7 +191,7 @@ new class extends Component
 
     protected function resetForm(): void
     {
-        $this->reset(['deviceId', 'rack_id', 'owner_id', 'name', 'type', 'status', 'u_start', 'u_end']);
+        $this->reset(['deviceId', 'rack_id', 'owner_id', 'name', 'type', 'status', 'u_start', 'u_end', 'port_count']);
         $this->resetValidation();
     }
 }; ?>
@@ -232,6 +236,8 @@ new class extends Component
             <flux:input type="number" wire:model="u_start" :label="__('U-start')" min="1" required />
             <flux:input type="number" wire:model="u_end" :label="__('U-eind')" min="1" required />
         </div>
+
+        <flux:input type="number" wire:model="port_count" :label="__('Aantal poorten')" min="1" max="96" required />
 
         <div class="flex justify-end gap-2">
             <flux:modal.close>

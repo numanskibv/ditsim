@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Auth;
 
-#[Fillable(['rack_id', 'owner_id', 'name', 'type', 'status', 'u_start', 'u_end', 'cpu', 'temp', 'metric_trend'])]
+#[Fillable(['rack_id', 'owner_id', 'name', 'type', 'status', 'u_start', 'u_end', 'port_count', 'cpu', 'temp', 'metric_trend'])]
 class Device extends Model
 {
     /** @use HasFactory<DeviceFactory> */
@@ -42,6 +42,7 @@ class Device extends Model
             'status' => DeviceStatus::class,
             'u_start' => 'integer',
             'u_end' => 'integer',
+            'port_count' => 'integer',
             'cpu' => 'integer',
             'temp' => 'integer',
             'metric_trend' => 'integer',

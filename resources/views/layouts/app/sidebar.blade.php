@@ -15,8 +15,11 @@
                     <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                         {{ __('Dashboard') }}
                     </flux:sidebar.item>
-                    <flux:sidebar.item icon="server-stack" :href="route('dcim.racks')" :current="request()->routeIs('dcim.*')" wire:navigate>
+                    <flux:sidebar.item icon="server-stack" :href="route('dcim.racks')" :current="request()->routeIs('dcim.racks')" wire:navigate>
                         {{ __('Racks (DCIM)') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="bolt" :href="route('dcim.cabling')" :current="request()->routeIs('dcim.cabling')" wire:navigate>
+                        {{ __('Bekabeling') }}
                     </flux:sidebar.item>
                     <flux:sidebar.item icon="ticket" :href="route('tickets.index')" :current="request()->routeIs('tickets.*')" wire:navigate>
                         {{ __('Tickets') }}

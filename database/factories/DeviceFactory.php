@@ -30,6 +30,7 @@ class DeviceFactory extends Factory
             'status' => fake()->randomElement(DeviceStatus::cases()),
             'u_start' => $start,
             'u_end' => $start + fake()->numberBetween(0, 2),
+            'port_count' => fake()->randomElement([4, 8, 24, 48]),
             'cpu' => fake()->numberBetween(10, 50),
             'temp' => fake()->numberBetween(30, 50),
             'metric_trend' => 0,
